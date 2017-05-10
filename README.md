@@ -1,3 +1,1 @@
 # numprog
-
-Test //Nitai
