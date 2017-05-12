@@ -1,0 +1,6 @@
+Wenn gerade gearbeitet wird den Status auf true setzen, damit der andere weiß, 
+dass gerade gearbeitet wird,damit keine Racecondition der Dateien entsteht.
+
+Nicht vergessen beim Aufhören auf false zu setzen.
+
+Dh vor jedem Arbeiten einmal pullen um Status anzusehen.
