@@ -7,7 +7,9 @@ public class Test_Gleitpunktzahl {
 	
 	
 	public static void main(String[] argv) {
+            
 		test_Gleitpunktzahl();
+                
 	}
 
 	public static void test_Gleitpunktzahl() {
