@@ -329,6 +329,23 @@ public class Gleitpunktzahl {
 		/*
 		 * TODO: hier ist die Operation denormalisiere zu implementieren.
 		 */
+
+		/** Spezialfälle wurden noch nicht beachtet */
+		/** Sind die Exponenten gleich groß muss nichts verändert werden */
+		if (a.exponent != b.exponent){
+			/** a wird im Folgenden bearbeitet, setze a gleich der größeren Zahl */
+			if (a.exponent < b.exponent){
+				Gleitpunktzahl tmp = a;
+				a = b;
+				b = tmp;
+			}
+			/** Demormalisierung 
+			 * Verschiebe Mantisse dem Unterschied entsprechend nach links */
+				a.mantisse <<= (a.mantisse - b.mantisse);
+			
+			/** Aktualisiere Exponent */
+			a.exponent = b.exponent;
+		}
 	}
 
 	/**
