@@ -173,7 +173,8 @@ public class Gleitpunktzahl {
 		/*
 		 * normalisiere uebernimmt die Aufgaben des Rundens
 		 */
-		this.normalisiere();
+		//this.normalisiere();
+                this.runden();
 	}
 
 	/** liefert eine String-Repraesentation des Objekts */
@@ -297,12 +298,23 @@ public class Gleitpunktzahl {
 		 * ist.
 		 * Achten Sie auf Sonderfaelle!
 		 */
-                /*
-		 * Exponent exp von d zur Basis 2 finden d ist danach im Intervall [1,2)
-		 */
-		
-                //aus setDouble evtl abschauen
                 
+                
+		//bei unendlich, NaN und Null gibts nichts zu normalisieren
+                if(this.isInfinite() || this.isNaN() || this.isNull()){
+                return;
+                }
+                
+                
+		while (mantisse >= 2) {
+			mantisse = mantisse / 2;
+			exponent++;
+		}
+		while (mantisse < 1) {
+			mantisse = 2 * mantisse;
+			exponent--;
+		} 
+		
 	}
         
         public void runden(){
@@ -329,23 +341,27 @@ public class Gleitpunktzahl {
 		/*
 		 * TODO: hier ist die Operation denormalisiere zu implementieren.
 		 */
-
-		/** Spezialfälle wurden noch nicht beachtet */
-		/** Sind die Exponenten gleich groß muss nichts verändert werden */
-		if (a.exponent != b.exponent){
+                
+                /** Spezialfälle wurden noch nicht beachtet */
+                //edit: bei unendlich, NaN und Null gibts nichts zu denormalisieren
+                if(a.isInfinite() || a.isNaN() || a.isNull()|| b.isInfinite() || b.isNaN() || b.isNull()){
+                return;
+                }
+ 		/** Sind die Exponenten gleich groß muss nichts verändert werden */
+ 		if (a.exponent != b.exponent){
 			/** a wird im Folgenden bearbeitet, setze a gleich der größeren Zahl */
-			if (a.exponent < b.exponent){
-				Gleitpunktzahl tmp = a;
-				a = b;
-				b = tmp;
-			}
-			/** Demormalisierung 
-			 * Verschiebe Mantisse dem Unterschied entsprechend nach links */
-				a.mantisse <<= (a.mantisse - b.mantisse);
-			
-			/** Aktualisiere Exponent */
-			a.exponent = b.exponent;
-		}
+ 			if (a.exponent < b.exponent){
+ 				Gleitpunktzahl tmp = a;
+ 				a = b;
+ 				b = tmp;
+ 			}
+ 			/** Demormalisierung 
+ 			 * Verschiebe Mantisse dem Unterschied entsprechend nach links */
+ 				a.mantisse <<= (a.mantisse - b.mantisse);
+ 			
+ 			/** Aktualisiere Exponent */
+ 			a.exponent = b.exponent;
+ 		}
 	}
 
 	/**
@@ -360,8 +376,33 @@ public class Gleitpunktzahl {
 		 * Funktionen normalisiere und denormalisiere.
 		 * Achten Sie auf Sonderfaelle!
 		 */
-
-		return new Gleitpunktzahl();
+                
+                Gleitpunktzahl result = new Gleitpunktzahl();
+                //NaN muss nicht beachtet werden, siehe Angabe
+                //Unendlich: falls eins Unendlich: ergebnis das gleiche Unendlich
+                //falls beide unendlich schauen ob in gleiche oder unterschiedliche Richtung               
+                    if(this.isInfinite() && !r.isInfinite()){
+                    return this;              
+                    }else if(!this.isInfinite() && r.isInfinite()){
+                    return r;
+                    }else if(this.isInfinite() && r.isInfinite()){
+                        if(this.vorzeichen == r.vorzeichen){
+                            return this;
+                        }
+                        else {
+                            result.setNull();
+                            return result;
+                              }
+                    }
+                
+                    //0
+                    if(this.isNull())return r;
+                    else if(r.isNull())return this;
+                    
+                    
+                    //eig Berechnung
+                    
+		return result;
 	}
 
 	/**
@@ -376,8 +417,15 @@ public class Gleitpunktzahl {
 		 * Funktionen normalisiere und denormalisiere.
 		 * Achten Sie auf Sonderfaelle!
 		 */
-		 
-		return new Gleitpunktzahl();
+		Gleitpunktzahl result = new Gleitpunktzahl();
+                //vorzeichen umdrehen da Subtraktion = Addition mit zweitem Summand mal -1
+                if(r.vorzeichen){
+                r.vorzeichen=false;
+                }else if(!r.vorzeichen){
+                r.vorzeichen=true;
+                }
+                result = this.add(r);
+		return result;
 	}
 	
 	/**
