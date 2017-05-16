@@ -297,15 +297,56 @@ public class Gleitpunktzahl {
 		 * und der Mantisse durch sizeExponent bzw. sizeMantisse festgelegt
 		 * ist.
 		 * Achten Sie auf Sonderfaelle!
-		 */
+		 */    
                 
-                
-		//bei unendlich, NaN und Null gibts nichts zu normalisieren
-                if(this.isInfinite() || this.isNaN() || this.isNull()){
-                return;
-                }
-                
-                
+		/** bei unendlich, NaN und Null gibt es nichts zu normalisieren */
+        if(this.isInfinite() || this.isNaN() || this.isNull()){
+        	return;
+        }
+        
+        /** Ist Mantisse normalisiert? 
+          * Most Significant Bit = 1?
+          * abhängig von der festgelegten Mantissengröße
+          * Sind höhere Bits != 0 bedeutet das, dass zusätzliche Information vorliegt 
+          * */
+        
+        // TODO Rundung einbauen ...
+
+        //zu groß?
+        for (int i = 0; i < 32 - sizeMantisse; i++){ //für alle (überflüssigen) größeren Bits
+
+        	// true -> zu groß
+        	if (this.mantisse >= (int) Math.pow(2, sizeMantisse)){ 
+        		this.mantisse >>= 1;
+
+        		// true -> größter Exponent erreicht, darüberhinaus Infinity
+        		if (this.exponent == maxExponent-expOffset){ 
+        			this.setInfinite(this.vorzeichen);
+        		} else {
+        			this.exponent++;
+        		}
+        	} else { 
+        	/** Ist die Mantisse nicht größer als sizeMantisse es erlaubt, 
+        	  * kann die Schleife unterbrochen werden */
+        		break;
+        	} 
+        }
+
+        //zu klein?
+        for (int i = 0; i < sizeMantisse; i++){
+        	// true -> most significant Bit ist nicht 1
+        	if (this.mantisse & ((int) Math.pow(2, sizeMantisse - 1)) == 0){
+        		this.mantisse <<= 1;
+
+        		//true -> untere Grenze erreicht, Zahl wird zu Null
+        		if(this.exponent == 0){
+        			this.setNull();
+        		} else {
+        			this.exponent--;
+        		}
+        	}
+        }
+        /** Mantissengröße wird nicht berücksichtigt; Mantisse kann nicht als Integer interpretiert werden
 		while (mantisse >= 2) {
 			mantisse = mantisse / 2;
 			exponent++;
@@ -314,13 +355,13 @@ public class Gleitpunktzahl {
 			mantisse = 2 * mantisse;
 			exponent--;
 		} 
-		
+		*/
 	}
         
-        public void runden(){
-        //runden nur in normalisierter Form ausführbar wegen folgendem if   
+    public void runden(){
+        /** Runden nur in normalisierter Form ausführbar wegen folgendem if  */ 
         if(exponent == Math.pow(2, -expOffset-1)){  
-        exponent++;
+        	exponent++;
         } 
         
         int lastbit = mantisse & 1;
@@ -330,7 +371,7 @@ public class Gleitpunktzahl {
             mantisse = mantisse >> 1; //rechtsshift
             mantisse = mantisse | 1; // (neues) letztes bit auf 1 setzen
         }
-        }
+    }
 
 	/**
 	 * denormalisiert die betragsmaessig goessere Zahl, so dass die Exponenten
@@ -342,11 +383,11 @@ public class Gleitpunktzahl {
 		 * TODO: hier ist die Operation denormalisiere zu implementieren.
 		 */
                 
-                /** Spezialfälle wurden noch nicht beachtet */
-                //edit: bei unendlich, NaN und Null gibts nichts zu denormalisieren
-                if(a.isInfinite() || a.isNaN() || a.isNull()|| b.isInfinite() || b.isNaN() || b.isNull()){
-                return;
-                }
+        
+        /** Spezialfälle müssen bei Operationen beachtet werden */
+        if(a.isInfinite() || a.isNaN() || a.isNull()|| b.isInfinite() || b.isNaN() || b.isNull()){
+            return;
+        }
  		/** Sind die Exponenten gleich groß muss nichts verändert werden */
  		if (a.exponent != b.exponent){
 			/** a wird im Folgenden bearbeitet, setze a gleich der größeren Zahl */
@@ -377,32 +418,44 @@ public class Gleitpunktzahl {
 		 * Achten Sie auf Sonderfaelle!
 		 */
                 
-                Gleitpunktzahl result = new Gleitpunktzahl();
+        Gleitpunktzahl result = new Gleitpunktzahl();
                 //NaN muss nicht beachtet werden, siehe Angabe
                 //Unendlich: falls eins Unendlich: ergebnis das gleiche Unendlich
-                //falls beide unendlich schauen ob in gleiche oder unterschiedliche Richtung               
-                    if(this.isInfinite() && !r.isInfinite()){
-                    return this;              
-                    }else if(!this.isInfinite() && r.isInfinite()){
-                    return r;
-                    }else if(this.isInfinite() && r.isInfinite()){
-                        if(this.vorzeichen == r.vorzeichen){
-                            return this;
-                        }
-                        else {
-                            result.setNull();
-                            return result;
-                              }
-                    }
+                //falls beide unendlich schauen ob in gleiche oder unterschiedliche Richtung  
+
+        denormalisiere(this, r);
+
+        /** Fall Infinite */             
+        if(this.isInfinite() && !r.isInfinite()){
+            return result.setInfinite(this.vorzeichen);  
+
+        }else if(!this.isInfinite() && r.isInfinite()){
+            return result.setInfinite(this.vorzeichen);
+
+        }else if(this.isInfinite() && r.isInfinite()){
+
+            if(this.vorzeichen == r.vorzeichen){
+                return result.setInfinite(this.vorzeichen);
+            } else {
+                return resultsetNaN();
+             }
+        }
                 
-                    //0
-                    if(this.isNull())return r;
-                    else if(r.isNull())return this;
-                    
-                    
-                    //eig Berechnung
-                    
-		return result;
+        /** Fall 0 */
+        if(this.isNull()) return new Gleitpunktzahl(r);
+        else if(r.isNull()) return new Gleitpunktzahl(this);
+
+        /** Fall Rechnen */
+                        
+        if(this.vorzeichen == r.vorzeichen){
+        	result.vorzeichen = this.vorzeichen;
+        	result.exponent = this.exponent;
+        	result.mantisse = this.mantisse + r.mantisse;
+        } else {
+        	result.exponent = this.exponent;
+        }
+                
+		return result.normalisiere();
 	}
 
 	/**
