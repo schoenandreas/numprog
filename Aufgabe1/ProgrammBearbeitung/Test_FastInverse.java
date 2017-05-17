@@ -1,3 +1,5 @@
+package Aufgabe1;
+
 import javax.swing.JFrame;
 
 /**

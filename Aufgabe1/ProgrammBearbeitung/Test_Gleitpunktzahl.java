@@ -1,3 +1,5 @@
+package Aufgabe1;
+
 import java.util.Arrays;
 
 public class Test_Gleitpunktzahl {
@@ -28,6 +30,7 @@ public class Test_Gleitpunktzahl {
 		Gleitpunktzahl.setSizeMantisse(4);
 		Gleitpunktzahl.setSizeExponent(2);
 
+                Double d;
 		Gleitpunktzahl x;
 		Gleitpunktzahl y;
 		Gleitpunktzahl gleitref = new Gleitpunktzahl();
@@ -37,6 +40,8 @@ public class Test_Gleitpunktzahl {
 		System.out.println("Test von setDouble");
 		try {
 			// Test: setDouble
+                        
+                        d = 0.5;
 			x = new Gleitpunktzahl(0.5);
 
 			// Referenzwerte setzen
@@ -47,14 +52,29 @@ public class Test_Gleitpunktzahl {
 					|| x.vorzeichen != gleitref.vorzeichen) {
 				printErg("" + x.toDouble(), "" + gleitref.toDouble());
 			} else {
-				System.out.println("    Richtiges Ergebnis\n");
+				System.out.println("Richtiges Ergebnis\n");
 			}
 
 			/*************
 			 * Eigene Tests einfuegen
 			 */
 
-			System.out.println("\n\nEIGENE TESTS EINFÜGEN!!!!!!!\n\n");
+			System.out.println("\nEIGENE TESTS\n");
+                    
+                        x = new Gleitpunktzahl(d);
+                        
+                        System.out.println("\nDouble: " + Double.toString(d) +
+                                        "\nGleitpunktzahl: " + x.toString() +  
+                                        "\nback to double: " + Double.toString(x.toDouble()));
+                        
+                        d = 5.0;
+                        x = new Gleitpunktzahl(d);
+                        
+                        System.out.println("\nDouble: " + Double.toString(d) +
+                                        "\nGleitpunktzahl: " + x.toString() +  
+                                        "\nback to double: " + Double.toString(x.toDouble()));
+                        
+                        
 
 		} catch (Exception e) {
 			System.out.print("Exception bei der Auswertung des Ergebnis!!\n");
@@ -68,12 +88,15 @@ public class Test_Gleitpunktzahl {
 			x = new Gleitpunktzahl(3.25);
 			y = new Gleitpunktzahl(0.5);
 
+                        System.out.println("Referenzwerte setzen");
 			// Referenzwerte setzen
 			gleitref = new Gleitpunktzahl(3.25 + 0.5);
 
+                        System.out.println("Berechnung");
 			// Berechnung
 			gleiterg = x.add(y);
 
+                        System.out.println("Test");
 			// Test, ob Ergebnis korrekt
 			if (gleiterg.compareAbsTo(gleitref) != 0
 					|| gleiterg.vorzeichen != gleitref.vorzeichen) {

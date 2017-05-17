@@ -1,3 +1,5 @@
+package Aufgabe1;
+
 public class Gleitpunktzahl {
 
 	/**
@@ -173,8 +175,7 @@ public class Gleitpunktzahl {
 		/*
 		 * normalisiere uebernimmt die Aufgaben des Rundens
 		 */
-		//this.normalisiere();
-                this.runden();
+		this.normalisiere();
 	}
 
 	/** liefert eine String-Repraesentation des Objekts */
@@ -310,56 +311,48 @@ public class Gleitpunktzahl {
           * Sind höhere Bits != 0 bedeutet das, dass zusätzliche Information vorliegt 
           * */
         
-        // TODO Rundung einbauen ...
-
-        //zu groß?
-        for (int i = 0; i < 32 - sizeMantisse; i++){ //für alle (überflüssigen) größeren Bits
-
-        	// true -> zu groß
-        	if (this.mantisse >= (int) Math.pow(2, sizeMantisse)){ 
-        		this.mantisse >>= 1;
-
-        		// true -> größter Exponent erreicht, darüberhinaus Infinity
-        		if (this.exponent == maxExponent-expOffset){ 
+        
+        //true -> unterstes Bit = 1 | false -> unterstes Bit = 0
+        boolean lastbit = false; 
+        
+        //Mantisse zu groß?
+        while(this.mantisse >= (int) Math.pow(2, sizeMantisse)){
+        System.out.println("zu groß");
+        System.out.println(this.toString());
+        	if (this.exponent > maxExponent-expOffset){ 
         			this.setInfinite(this.vorzeichen);
         		} else {
         			this.exponent++;
         		}
-        	} else { 
-        	/** Ist die Mantisse nicht größer als sizeMantisse es erlaubt, 
-        	  * kann die Schleife unterbrochen werden */
-        		break;
-        	} 
+                if (this.mantisse % 2 == 1) {
+                    lastbit = true;
+                } else {
+                    lastbit = false;
+                }
+                this.mantisse >>= 1;
         }
+        
+        //Runden
+        if (lastbit) this.mantisse++;
 
-        //zu klein?
-        for (int i = 0; i < sizeMantisse; i++){
-        	// true -> most significant Bit ist nicht 1
-        	if (this.mantisse & ((int) Math.pow(2, sizeMantisse - 1)) == 0){
-        		this.mantisse <<= 1;
-
-        		//true -> untere Grenze erreicht, Zahl wird zu Null
-        		if(this.exponent == 0){
+        //Mantisse zu klein?
+        while(this.mantisse <= (int) Math.pow(2, sizeMantisse - 1) - 1 
+                && !this.isInfinite() && !this.isNull()){
+        System.out.println("zu klein");	
+        System.out.println(this.toString());
+        	if(this.exponent == 0){
         			this.setNull();
         		} else {
         			this.exponent--;
         		}
-        	}
+                
+                this.mantisse <<= 1;
         }
-        /** Mantissengröße wird nicht berücksichtigt; Mantisse kann nicht als Integer interpretiert werden
-		while (mantisse >= 2) {
-			mantisse = mantisse / 2;
-			exponent++;
-		}
-		while (mantisse < 1) {
-			mantisse = 2 * mantisse;
-			exponent--;
-		} 
-		*/
 	}
         
+    /**
     public void runden(){
-        /** Runden nur in normalisierter Form ausführbar wegen folgendem if  */ 
+        // Runden nur in normalisierter Form ausführbar wegen folgendem if  
         if(exponent == Math.pow(2, -expOffset-1)){  
         	exponent++;
         } 
@@ -372,9 +365,10 @@ public class Gleitpunktzahl {
             mantisse = mantisse | 1; // (neues) letztes bit auf 1 setzen
         }
     }
+    */
 
 	/**
-	 * denormalisiert die betragsmaessig goessere Zahl, so dass die Exponenten
+	 * denormalisiert die betragsmaessig groessere Zahl, so dass die Exponenten
 	 * von a und b gleich sind. Die Mantissen beider Zahlen werden entsprechend
 	 * erweitert. Denormalisieren wird fuer add und sub benoetigt.
 	 */
@@ -396,9 +390,9 @@ public class Gleitpunktzahl {
  				a = b;
  				b = tmp;
  			}
- 			/** Demormalisierung 
+ 			/** Denormalisierung 
  			 * Verschiebe Mantisse dem Unterschied entsprechend nach links */
- 				a.mantisse <<= (a.mantisse - b.mantisse);
+ 			a.mantisse <<= (a.mantisse - b.mantisse);
  			
  			/** Aktualisiere Exponent */
  			a.exponent = b.exponent;
@@ -422,40 +416,85 @@ public class Gleitpunktzahl {
                 //NaN muss nicht beachtet werden, siehe Angabe
                 //Unendlich: falls eins Unendlich: ergebnis das gleiche Unendlich
                 //falls beide unendlich schauen ob in gleiche oder unterschiedliche Richtung  
-
+        System.out.println("vor denormalisiere");    
         denormalisiere(this, r);
+        System.out.println("nach denormalisiere");
+        
+        System.out.println("Fall Inf");
+        /** Fall Infinite */ 
 
-        /** Fall Infinite */             
         if(this.isInfinite() && !r.isInfinite()){
-            return result.setInfinite(this.vorzeichen);  
+        	result.setInfinite(this.vorzeichen);
+            return result;  
 
         }else if(!this.isInfinite() && r.isInfinite()){
-            return result.setInfinite(this.vorzeichen);
+        	result.setInfinite(r.vorzeichen);
+            return result;
 
         }else if(this.isInfinite() && r.isInfinite()){
 
             if(this.vorzeichen == r.vorzeichen){
-                return result.setInfinite(this.vorzeichen);
+            	result.setInfinite(this.vorzeichen);
+                return result;
             } else {
-                return resultsetNaN();
+                result.setNaN();
+                return result;
              }
         }
-                
+        
+        System.out.println("Fall 0");
         /** Fall 0 */
+
         if(this.isNull()) return new Gleitpunktzahl(r);
         else if(r.isNull()) return new Gleitpunktzahl(this);
 
+        System.out.println("sonst Berechnung");
         /** Fall Rechnen */
                         
         if(this.vorzeichen == r.vorzeichen){
         	result.vorzeichen = this.vorzeichen;
         	result.exponent = this.exponent;
         	result.mantisse = this.mantisse + r.mantisse;
-        } else {
-        	result.exponent = this.exponent;
+
+        /** "Subtraktion" */
+        } else if (this.vorzeichen){
+        	//Auslöschung
+        	if (this.mantisse == r.mantisse) {
+        		result.setNull();
+        		return result;
+        	}
+        	if (this.mantisse > r.mantisse){
+        		result.vorzeichen = true;
+        		result.mantisse = this.mantisse - r.mantisse;
+        		result.exponent = this.exponent;
+        	} else {
+        		result.vorzeichen = false;
+        		result.mantisse = r.mantisse - this.mantisse;
+        		result.exponent = r.exponent;
+        	}
+
+        } else if (r.vorzeichen){
+        	//Auslöschung
+        	if(this.mantisse == r.mantisse) {
+        		result.setNull();
+        		return result;
+        	}
+        	if (r.mantisse > this.mantisse){
+        		result.vorzeichen = true;
+        		result.mantisse = r.mantisse - this.mantisse;
+        		result.exponent = r.exponent;
+        	} else {
+        		result.vorzeichen = false;
+        		result.mantisse = this.mantisse - r.mantisse;
+        		result.exponent = r.exponent;
+        	}
+
+
         }
-                
-		return result.normalisiere();
+        System.out.println("vor normalisiere");
+        result.normalisiere();
+        System.out.println("nach normalisiere");
+        return result;
 	}
 
 	/**
@@ -471,13 +510,15 @@ public class Gleitpunktzahl {
 		 * Achten Sie auf Sonderfaelle!
 		 */
 		Gleitpunktzahl result = new Gleitpunktzahl();
-                //vorzeichen umdrehen da Subtraktion = Addition mit zweitem Summand mal -1
-                if(r.vorzeichen){
-                r.vorzeichen=false;
-                }else if(!r.vorzeichen){
-                r.vorzeichen=true;
-                }
-                result = this.add(r);
+
+        //vorzeichen umdrehen da Subtraktion = Addition mit zweitem Summand mal -1
+        if(r.vorzeichen){
+            r.vorzeichen = false;
+        }else if(!r.vorzeichen){
+            r.vorzeichen = true;
+        }
+        
+        result = this.add(r);
 		return result;
 	}
 	
