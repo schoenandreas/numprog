@@ -292,6 +292,7 @@ public class Gleitpunktzahl {
 	 * Beispiel: Bei 3 Mantissenbits wird die Zahl 10.11 * 2^-1 zu 1.10 * 2^0
 	 */
 	public void normalisiere() {
+        //System.out.println("\nIn normalisiere");
 		/*
 		 * TODO: hier ist die Operation normalisiere zu implementieren.
 		 * Beachten Sie, dass die Groesse (Anzahl der Bits) des Exponenten
@@ -315,11 +316,12 @@ public class Gleitpunktzahl {
         //true -> unterstes Bit = 1 | false -> unterstes Bit = 0
         boolean lastbit = false; 
         
+        //System.out.println(this.toString());
+        
         //Mantisse zu groß?
         while(this.mantisse >= (int) Math.pow(2, sizeMantisse)){
-        System.out.println("zu groß");
-        System.out.println(this.toString());
-        	if (this.exponent > maxExponent-expOffset){ 
+        //System.out.println("Mantisse >>");
+        	if (this.exponent > maxExponent){ 
         			this.setInfinite(this.vorzeichen);
         		} else {
         			this.exponent++;
@@ -330,6 +332,8 @@ public class Gleitpunktzahl {
                     lastbit = false;
                 }
                 this.mantisse >>= 1;
+                
+        //System.out.println(this.toString());
         }
         
         //Runden
@@ -338,8 +342,7 @@ public class Gleitpunktzahl {
         //Mantisse zu klein?
         while(this.mantisse <= (int) Math.pow(2, sizeMantisse - 1) - 1 
                 && !this.isInfinite() && !this.isNull()){
-        System.out.println("zu klein");	
-        System.out.println(this.toString());
+        //System.out.println("Mantisse <<");
         	if(this.exponent == 0){
         			this.setNull();
         		} else {
@@ -347,25 +350,11 @@ public class Gleitpunktzahl {
         		}
                 
                 this.mantisse <<= 1;
+                	
+        //System.out.println(this.toString());
         }
+        //System.out.println(this.toString());
 	}
-        
-    /**
-    public void runden(){
-        // Runden nur in normalisierter Form ausführbar wegen folgendem if  
-        if(exponent == Math.pow(2, -expOffset-1)){  
-        	exponent++;
-        } 
-        
-        int lastbit = mantisse & 1;
-        if (lastbit == 0){              //abrunden
-            mantisse = mantisse >> 1; //rechtsshift
-        }else if(lastbit == 1){         //aufrunden
-            mantisse = mantisse >> 1; //rechtsshift
-            mantisse = mantisse | 1; // (neues) letztes bit auf 1 setzen
-        }
-    }
-    */
 
 	/**
 	 * denormalisiert die betragsmaessig groessere Zahl, so dass die Exponenten
@@ -373,11 +362,13 @@ public class Gleitpunktzahl {
 	 * erweitert. Denormalisieren wird fuer add und sub benoetigt.
 	 */
 	public static void denormalisiere(Gleitpunktzahl a, Gleitpunktzahl b) {
+        //System.out.println("\nIn denormalisiere");
 		/*
 		 * TODO: hier ist die Operation denormalisiere zu implementieren.
 		 */
                 
-        
+        //System.out.println(a.toString());
+        //System.out.println(b.toString());
         /** Spezialfälle müssen bei Operationen beachtet werden */
         if(a.isInfinite() || a.isNaN() || a.isNull()|| b.isInfinite() || b.isNaN() || b.isNull()){
             return;
@@ -392,11 +383,13 @@ public class Gleitpunktzahl {
  			}
  			/** Denormalisierung 
  			 * Verschiebe Mantisse dem Unterschied entsprechend nach links */
- 			a.mantisse <<= (a.mantisse - b.mantisse);
+ 			a.mantisse <<= (a.exponent - b.exponent);
  			
  			/** Aktualisiere Exponent */
  			a.exponent = b.exponent;
  		}
+        //System.out.println(a.toString());
+        //System.out.println(b.toString());
 	}
 
 	/**
@@ -415,12 +408,10 @@ public class Gleitpunktzahl {
         Gleitpunktzahl result = new Gleitpunktzahl();
                 //NaN muss nicht beachtet werden, siehe Angabe
                 //Unendlich: falls eins Unendlich: ergebnis das gleiche Unendlich
-                //falls beide unendlich schauen ob in gleiche oder unterschiedliche Richtung  
-        System.out.println("vor denormalisiere");    
+                //falls beide unendlich schauen ob in gleiche oder unterschiedliche Richtung    
         denormalisiere(this, r);
-        System.out.println("nach denormalisiere");
         
-        System.out.println("Fall Inf");
+        //System.out.println("Fall Inf");
         /** Fall Infinite */ 
 
         if(this.isInfinite() && !r.isInfinite()){
@@ -442,13 +433,13 @@ public class Gleitpunktzahl {
              }
         }
         
-        System.out.println("Fall 0");
+        //System.out.println("Fall 0");
         /** Fall 0 */
 
         if(this.isNull()) return new Gleitpunktzahl(r);
         else if(r.isNull()) return new Gleitpunktzahl(this);
 
-        System.out.println("sonst Berechnung");
+        //System.out.println("Berechnung sonst");
         /** Fall Rechnen */
                         
         if(this.vorzeichen == r.vorzeichen){
@@ -491,9 +482,9 @@ public class Gleitpunktzahl {
 
 
         }
-        System.out.println("vor normalisiere");
+        this.normalisiere();
+        r.normalisiere();
         result.normalisiere();
-        System.out.println("nach normalisiere");
         return result;
 	}
 
@@ -509,7 +500,7 @@ public class Gleitpunktzahl {
 		 * Funktionen normalisiere und denormalisiere.
 		 * Achten Sie auf Sonderfaelle!
 		 */
-		Gleitpunktzahl result = new Gleitpunktzahl();
+	Gleitpunktzahl result = new Gleitpunktzahl();
 
         //vorzeichen umdrehen da Subtraktion = Addition mit zweitem Summand mal -1
         if(r.vorzeichen){
