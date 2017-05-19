@@ -15,8 +15,9 @@ import javax.swing.JFrame;
 public class Test_FastInverse {
 
 	/** Beispielwerte fuer IEEE Standard mit 32 Bits */
-	private static int MAGIC_NUMBER = 0x5f3759df;
-
+	//Original: 0x5f3759df;
+        private static int MAGIC_NUMBER = 0x5f375900;
+        
 	private static int anzBitsExponent = 8;
 	private static int anzBitsMantisse = 24;
 
@@ -39,6 +40,9 @@ public class Test_FastInverse {
 		int numOfSamplingPts = 1001;
 		float[] xData = new float[numOfSamplingPts];
 		float[] yData = new float[numOfSamplingPts];
+                
+                float[] zData = new float[numOfSamplingPts];
+                
 		float x = 0.10f;
 
 		/* calculate data to plot */
@@ -46,6 +50,7 @@ public class Test_FastInverse {
 			xData[i] = x;
 			Gleitpunktzahl y = new Gleitpunktzahl(x);
 			yData[i] = (float) FastMath.absInvSqrtErr(y);
+                        zData[i] = (float) FastMath.invSqrt(y).toDouble();
 
 			x *= Math.pow(100.0d, 1.0d / numOfSamplingPts);
 		}
@@ -55,6 +60,7 @@ public class Test_FastInverse {
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		try {
 			frame.add(new Plotter(xData, yData));
+                        frame.add(new Plotter(xData, zData));
 		} catch (InstantiationException exception) {
 			exception.printStackTrace();
 			System.exit(1);
