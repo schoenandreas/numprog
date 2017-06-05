@@ -10,10 +10,30 @@ public class Gauss {
 	 * b: Ein Vektor der Laenge n
 	 */
 	public static double[] backSubst(double[][] R, double[] b) {
-		//TODO: Diese Methode ist zu implementieren
-		return new double[2];
+		
+                int n = b.length -1;
+                final int m = b.length -1;   
+                double[] x = new double[n+1];
+                
+                //löst x von unten nach oben zeilenweise
+                for( n = b.length -1 ; n >=0 ; n-- ){
+                    
+                    int l = n + 1;
+                    double acc = 0;
+                    //summiert alle Summanten der Zeile mit bereits bekanntem x auf
+                    while(l<=m){
+                        acc += (R[n][l] * x[l] );                       
+                        l++;
+                    }
+                    
+                    
+                    x[n] = (-1) * ( acc - b[n] ) / R[n][n];
+                }
+                
+		return x;
 	}
-
+        
+        
 	/**
 	 * Diese Methode soll die Loesung x des LGS A*x=b durch Gauss-Elimination mit
 	 * Spaltenpivotisierung ermitteln. A und b sollen dabei nicht veraendert werden. 
