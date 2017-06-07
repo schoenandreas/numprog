@@ -20,7 +20,7 @@ public class Gauss {
                     
                     int l = n + 1;
                     double acc = 0;
-                    //summiert alle Summanten der Zeile mit bereits bekanntem x auf
+                    //summiert alle Summanden der Zeile mit bereits bekanntem x auf
                     while(l<=m){
                         acc += (R[n][l] * x[l] );                       
                         l++;
@@ -42,8 +42,58 @@ public class Gauss {
 	 * b: Ein Vektor der Laenge n
 	 */
 	public static double[] solve(double[][] A, double[] b) {
-		//TODO: Diese Methode ist zu implementieren
-		return new double[2];
+
+                //kopieren da A und b unverändert bleiben sollen
+                double[][] Acopy = A.clone();
+                double[] bcopy = b.clone();
+                int length = bcopy.length;
+                for(int n = 0 ; n < length ; n++){
+                    //größten Wert unter Diagonale in aktueller Spalte finden
+                    double biggestValue = Acopy[n][n];
+                    int biggestValueLine = n;
+                    for(int i = n ; i<length ; i++){
+                        double a;
+                        if(Acopy[i][n] < 0){
+                            a = -1 * Acopy[i][n];
+                        }
+                        else {
+                            a = Acopy[i][n];
+                        }
+                        
+                        if( a > biggestValue) {
+                            biggestValue = a;
+                            biggestValueLine = i;
+                        }
+                    }
+                    //tauschen falls Wert auf Diagonale nicht der größte ist
+                    if(biggestValueLine != n){
+                        //Acopy
+                        double[] tmp = Acopy[n];
+                        Acopy[n] = Acopy[biggestValueLine];
+                        Acopy[biggestValueLine] = tmp;
+                        
+                        //bcopy
+                        double tmp2 = bcopy[n];
+                        bcopy[n] = bcopy[biggestValueLine];
+                        bcopy[biggestValueLine] = tmp2;
+                    }
+                    
+                    //Werte unter dem biggestValue auf 0 bringen
+                    for (int i = (n+1); i < length; i++) {
+                        if(Acopy[i][n] != 0){
+                            double lineFactor = Acopy[i][n] / Acopy[n][n];
+                            //Pivotzeile mit Faktor abziehen
+                            for (int j = n; j < length; j++) {
+                                Acopy[i][j] = Acopy[i][j] - (lineFactor * Acopy[n][j]);
+                            }
+                            
+                            bcopy[i] = bcopy[i] - (lineFactor * bcopy[n]);
+                        }
+                    }
+                    
+                }
+                
+		return backSubst(Acopy, bcopy);
 	}
 
 	/**
@@ -64,8 +114,89 @@ public class Gauss {
 	 * A: Eine singulaere Matrix der Groesse n x n 
 	 */
 	public static double[] solveSing(double[][] A) {
-		//TODO: Diese Methode ist zu implementieren
-		return new double[2];
+		//kopieren da A  unverändert bleiben soll
+                double[][] Acopy = A.clone();
+                int length = Acopy.length;
+                for(int n = 0 ; n < length ; n++){
+                    //größten Wert unter Diagonale in aktueller Spalte finden
+                    double biggestValue = 0;
+                    int biggestValueLine = -1;
+                    for(int i = n ; i<length ; i++){
+                        double a;
+                        if(Acopy[i][n] < 0){
+                            a = -1 * Acopy[i][n];
+                        }
+                        else {
+                            a = Acopy[i][n];
+                        }
+                        
+                        if( a > biggestValue) {
+                            biggestValue = a;
+                            biggestValueLine = i;
+                        }
+                    }
+                    //kein Pivotelement gefunden
+                    if(biggestValue < 0.0000000001){
+                        //T aus Acopy rauskopieren
+                        double[][] T = new double[n-1][n-1];
+                        for(int i = 0; i< T.length; i++) {
+                            for (int j = 0; j< T.length; j++) {
+                                T[i][j] = Acopy[i][j];
+                            }
+                        }
+                        //v aus Acopy rauskopieren und negieren
+                        double[] v = new double[n-1];
+                        for (int i= 0; i< v.length; i++) {
+                            v[i] = (-1) * Acopy[i][n];
+                        }
+                        //x berechnen
+                        double[] x = backSubst(T , v);
+                        
+                        //p zusammenstellen
+                        double[] p = new double[Acopy.length];
+                        for (int i= 0; i< p.length; i++) {
+                            if( i  < x.length){
+                                p[i] = x[i];
+                            }else if( i == x.length){
+                                p[i] = 1;
+                            }else{
+                                p[i] = 0;
+                            }
+                        }
+                        
+                        return p;
+                    }
+                    
+                    
+                    
+                    //tauschen falls Wert auf Diagonale nicht der größte ist
+                    if(biggestValueLine != n){
+                        //Acopy
+                        double[] tmp = Acopy[n];
+                        Acopy[n] = Acopy[biggestValueLine];
+                        Acopy[biggestValueLine] = tmp;
+                        
+                    }
+                    
+                    //Werte unter dem biggestValue auf 0 bringen
+                    for (int i = (n+1); i < length; i++) {
+                        if(Acopy[i][n] != 0){
+                            double lineFactor = Acopy[i][n] / Acopy[n][n];
+                            //Pivotzeile mit Faktor abziehen
+                            for (int j = n; j < length; j++) {
+                                Acopy[i][j] = Acopy[i][j] - (lineFactor * Acopy[n][j]);
+                            }
+                        }
+                    }
+                    
+                }
+                
+                //falls regulär, und immer Pivot gefunden wird Nullvektor zurückgeben
+                double[] nullVektor = new double[length];
+                for (int i = 0; i < length; i ++) {
+                    nullVektor[i] = 0;
+                }
+		return nullVektor;
 	}
 
 	/**
