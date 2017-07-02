@@ -100,7 +100,7 @@ public class CubicSpline implements InterpolationMethod {
          *m ist daher n - 1
          */
         int m = this.n - 1;
-        
+
         //Initialisierung der Tridiagonalen Matrix mit 1,4,1
         double[] diagonal = new double[m];
         double[] upperAndLower = new double[m];
@@ -109,25 +109,25 @@ public class CubicSpline implements InterpolationMethod {
         Arrays.fill(upperAndLower, 1.0);
         TridiagonalMatrix triMatrix
                 = new TridiagonalMatrix(upperAndLower, diagonal, upperAndLower);
-        
+
         double faktor = 3 / this.h;
-        
+
         //Initialisierung b des Gleichungssystems triMatrix * result = b
         double[] b = new double[m];
-        
+
         //Grenzfaelle
         b[0] = faktor * this.y[2] - faktor * this.y[0] - this.yprime[0];
         b[n - 2] = faktor * this.y[this.n] - faktor * this.y[n - 2] - this.yprime[n];
-        
+
         //m - 2 verbleibende Ableitungen
-        for (int i = 1; i < m - 1; i++){
+        for (int i = 1; i < m - 1; i++) {
             b[i] = this.y[i + 2] - this.y[i];
         }
-        
+
         //Resultat berechnen und yprime kopieren (yprime1 bis yprimeN-1
         double[] result = triMatrix.solveLinearSystem(b);
-        
-        for (int i = 0; i < result.length; i++){
+
+        for (int i = 0; i < result.length; i++) {
             this.yprime[i + 1] = result[i];
         }
     }
@@ -140,7 +140,39 @@ public class CubicSpline implements InterpolationMethod {
      */
     @Override
     public double evaluate(double z) {
-        /* TODO: diese Methode ist zu implementieren */
-        return 0.0;
+        //Grenzfaelle
+        if (z < 0) {
+            return this.y[0];
+        }
+        if (z > this.h * this.n) {
+            return this.y[this.n];
+        }
+
+        //Finde das richtige Intervall
+        int index = 0;
+        for (int i = 0; i < n; i++) {
+            if (z < this.h * i) {
+                index = i;
+                break;
+            }
+        }
+
+        double untereGrenze = this.h * (index - 1);
+        double obereGrenze = this.h * index;
+
+        //Transfomation von z in das Intervall [0,1]
+        double t = (z - untereGrenze) / (obereGrenze - untereGrenze);
+
+        //Auswertung mit Hermit-Basis
+        double h0 = 1 - (3.0 * (t * t)) + (2.0 * (t * t * t));
+        double h1 = (3.0 * (t + t)) - (2.0 * (t * t * t));
+        double h2 = t - (2.0 * (t * t)) + (t * t * t);
+        double h3 = 0 - (t * t) + (t * t * t);
+
+        double result = (this.y[index] * h0) + (this.y[index + 1] * h1)
+                + (this.h * this.yprime[index] * h2)
+                + (this.h * this.yprime[index + 1] * h3);
+
+        return result;
     }
 }

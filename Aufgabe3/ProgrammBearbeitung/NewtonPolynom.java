@@ -89,23 +89,24 @@ public class NewtonPolynom implements InterpolationMethod {
      * Es gilt immer: x und y sind gleich lang.
      */
     private void computeCoefficients(double[] y) {
+        //n Stuetzstellen -> Polynom hat Grad n - 1
         int n = x.length;
 
         //Initialiserung von a und f
-        this.a = new double[x.length];
-        this.f = new double[x.length];
+        this.a = new double[n];
+        this.f = new double[n];
 
         //lokales Array
-        double[] coeff = new double[x.length];
+        double[] coeff = new double[n];
 
-        //Erste Spalte
+        //1. Spalte
         for (int i = 0; i < n; i++) {
             coeff[i] = y[i];
         }
         this.a[0] = coeff[0];
         this.f[0] = coeff[n - 1];
 
-        //
+        //n - 1 Spalten
         for (int k = 1; k < n; k++) {
 
             for (int i = 0; i < n - k; i++) {
@@ -115,8 +116,8 @@ public class NewtonPolynom implements InterpolationMethod {
                         / (this.x[i + k] - this.x[i]);
 
                 coeff[i] = coeff_new;
-
             }
+            
             this.a[k] = coeff[0];
             this.f[k] = coeff[n - k];
         }
@@ -152,24 +153,24 @@ public class NewtonPolynom implements InterpolationMethod {
      * @param y_new neuer Stuetzwert
      */
     public void addSamplingPoint(double x_new, double y_new) {
-        //Arraygroesse anpassen
+        //Array erweitern
         this.x = Arrays.copyOf(x, x.length + 1);
         this.a = Arrays.copyOf(a, a.length + 1);
         this.f = Arrays.copyOf(f, f.length + 1);
-        
+
         int n = x.length;
-        
+
         this.x[n - 1] = x_new;
-        
+
         double coeff = y_new;
-        
-        for (int k = 1; k < n; k++){
-            
-            double coeff_new = (coeff - this.f[k - 1]) 
+
+        for (int k = 1; k < n; k++) {
+
+            double coeff_new = (coeff - this.f[k - 1])
                     / (x_new - this.x[n - k - 1]);
-            
+
             coeff = this.f[k];
-            
+
             this.f[k] = coeff_new;
         }
         this.a[n - 1] = this.f[n - 1];
@@ -182,8 +183,19 @@ public class NewtonPolynom implements InterpolationMethod {
      */
     @Override
     public double evaluate(double z) {
-        double result;
-        
-        return 0.0;
+        int n = x.length;
+
+        //gemaess der Horner-Schema-aenlichen Formel
+        double faktor = this.a[n - 1];
+        double summand = this.a[n - 2];
+
+        for (int i = 1; i < n; i++) {
+            faktor = summand + ((z - this.x[n - i]) * faktor);
+        }
+
+        double result = faktor;
+
+        return result;
     }
+
 }
