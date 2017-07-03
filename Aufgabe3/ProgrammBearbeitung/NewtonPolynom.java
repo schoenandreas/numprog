@@ -89,7 +89,7 @@ public class NewtonPolynom implements InterpolationMethod {
      * Es gilt immer: x und y sind gleich lang.
      */
     private void computeCoefficients(double[] y) {
-        //n Stuetzstellen -> Polynom hat Grad n - 1
+        //
         int n = x.length;
 
         //Initialiserung von a und f
@@ -117,7 +117,7 @@ public class NewtonPolynom implements InterpolationMethod {
 
                 coeff[i] = coeff_new;
             }
-            
+
             this.a[k] = coeff[0];
             this.f[k] = coeff[n - k];
         }
@@ -185,7 +185,7 @@ public class NewtonPolynom implements InterpolationMethod {
     public double evaluate(double z) {
         int n = x.length;
 
-        //gemaess der Horner-Schema-aenlichen Formel
+        //gemaess der Horner-Schema-aehnlichen Formel
         double faktor = this.a[n - 1];
         double summand = this.a[n - 2];
 
